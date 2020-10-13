@@ -105,3 +105,21 @@ class Binance(Exchange):
             return self._api.sapi_get_margin_isolated_account()
         except ccxt.BaseError as e:
             logger.warning('Unable to get isolated margin account info. Reason: %s', e)
+    
+    def isolated_margin_transfer(self, asset: str, symbol: str, transFrom: str, transTo: str, amount: float) -> dict:
+        """
+        Initiates transfer of an asset, such as BTC, to an isolated margin wallet for use as collateral when trading on margin.
+        this isolated margin transfer is binance-specific.
+        """
+        # amount = self.amount_to_precision(symbol, amount)
+        
+        try:
+            return self._api.sapi_post_margin_isolated_transfer({
+                'asset': asset, 
+                'symbol': symbol,
+                'transFrom': transFrom,
+                'transTo': transTo,
+                'amount': amount
+                })
+        except ccxt.BaseError as e:
+            logger.warning('Unable to get isolated margin account info. Reason: %s', e)
