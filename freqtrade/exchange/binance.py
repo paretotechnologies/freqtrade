@@ -134,3 +134,16 @@ class Binance(Exchange):
         except ccxt.BaseError as e:
             logger.warning('Unable to get isolated margin account info. Reason: %s', e)
     
+    def query_max_borrow(self, asset: str, isolatedSymbol: str):
+        """
+        Query maximum borrowable amount of asset for isolated margin symbol
+        """
+        
+        try:
+            return self._api.sapi_get_margin_maxborrowable({
+                'asset': asset, 
+                'isolatedSymbol': isolatedSymbol
+                })
+        except ccxt.BaseError as e:
+            logger.warning('Unable to get isolated margin account info. Reason: %s', e)
+    
