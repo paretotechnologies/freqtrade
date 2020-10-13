@@ -233,6 +233,7 @@ class Exchange:
             markets = {k: v for k, v in markets.items() if self.market_is_tradable(v)}
         if active_only:
             markets = {k: v for k, v in markets.items() if market_is_active(v)}
+        # Filter markets by isolated margin trading enabled status
         if margin_only:
             markets = {k: v for k, v in markets.items() if market_is_margin_enabled(v)}
 
