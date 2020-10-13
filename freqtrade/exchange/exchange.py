@@ -159,6 +159,13 @@ class Exchange:
             'password': exchange_config.get('password'),
             'uid': exchange_config.get('uid', ''),
         }
+
+        # # Configure margin trading
+        # if config['margin_enabled']:
+        #     ex_config.options = {
+        #         'defaultType': 'margin'
+        #         }
+
         if ccxt_kwargs:
             logger.info('Applying additional ccxt config: %s', ccxt_kwargs)
             ex_config.update(ccxt_kwargs)
@@ -226,6 +233,9 @@ class Exchange:
             markets = {k: v for k, v in markets.items() if self.market_is_tradable(v)}
         if active_only:
             markets = {k: v for k, v in markets.items() if market_is_active(v)}
+        if margin_only:
+            markets = {k: v for k, v in markets.items() if market_is_margin_enabled(v)}
+
         return markets
 
     def get_quote_currencies(self) -> List[str]:
@@ -527,8 +537,7 @@ class Exchange:
             closed_order["info"].update({"stopPrice": closed_order["price"]})
         self._dry_run_open_orders[closed_order["id"]] = closed_order
 
-    def create_order(self, pair: str, ordertype: str, side: str, amount: float,
-                     rate: float, params: Dict = {}) -> Dict:
+    def create_order(self, pair: str, ordertype: str, side: str, amount: float, rate: float, params: Dict = {}) -> Dict:
         try:
             # Set the precision for amount and price(rate) as accepted by the exchange
             amount = self.amount_to_precision(pair, amount)
