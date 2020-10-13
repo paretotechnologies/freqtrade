@@ -98,3 +98,10 @@ class Binance(Exchange):
                 f'Could not place sell order due to {e.__class__.__name__}. Message: {e}') from e
         except ccxt.BaseError as e:
             raise OperationalException(e) from e
+    
+    def get_isolated_margin_account(self) -> dict:
+        """ Get isolated margin account info """
+        try:
+            return self._api.sapi_get_margin_isolated_account()
+        except ccxt.BaseError as e:
+            logger.warning('Unable to get isolated margin account info. Reason: %s', e)
