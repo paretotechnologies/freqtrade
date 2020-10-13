@@ -1308,3 +1308,9 @@ def market_is_active(market: Dict) -> bool:
     # See https://github.com/ccxt/ccxt/issues/4874,
     # https://github.com/ccxt/ccxt/issues/4075#issuecomment-434760520
     return market.get('active', True) is not False
+
+def market_is_margin_enabled(market: Dict) -> bool:
+    """
+    Return True if isolated margin trading is enabled for the market.
+    """
+    return market.get('margin', True) is not False
