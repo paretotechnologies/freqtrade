@@ -577,6 +577,14 @@ class Exchange:
         params = self._params.copy()
         if time_in_force != 'gtc' and ordertype != 'market':
             params.update({'timeInForce': time_in_force})
+        
+        ''' Set type to 'margin' if margin trading is enabled '''
+        if self._config['margin'].get('enabled'):
+            params.update({'type': 'margin'})
+            if self._config['margin'].get('isolated'):
+                params.update({'isolated': True})
+            if self._config['margin'].get('auto_repay'):
+                params.update({'sideEffectType': 'AUTO_REPAY'})
 
         return self.create_order(pair, ordertype, 'buy', amount, rate, params)
 
@@ -590,6 +598,14 @@ class Exchange:
         params = self._params.copy()
         if time_in_force != 'gtc' and ordertype != 'market':
             params.update({'timeInForce': time_in_force})
+        
+         ''' Set type to 'margin' if margin trading is enabled '''
+        if self._config['margin'].get('enabled'):
+            params.update({'type': 'margin'})
+            if self._config['margin'].get('isolated'):
+                params.update({'isolated': True})
+            if self._config['margin'].get('auto_repay'):
+                params.update({'sideEffectType': 'AUTO_REPAY'})
 
         return self.create_order(pair, ordertype, 'sell', amount, rate, params)
 
