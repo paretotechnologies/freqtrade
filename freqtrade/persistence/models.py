@@ -475,7 +475,7 @@ class Trade(_DECL_BASE):
         self.open_trade_price = self._calc_open_trade_price()
 
     def calc_close_trade_price(self, rate: Optional[float] = None,
-                               fee: Optional[float] = None) -> float:
+                               fee: Optional[float] = None, interest_rate: Optional[float] = None) -> float:
         """
         Calculate the close_rate including fee
         :param fee: fee to use on the close rate (optional).
@@ -489,10 +489,14 @@ class Trade(_DECL_BASE):
 
         sell_trade = Decimal(self.amount) * Decimal(rate or self.close_rate)
         fees = sell_trade * Decimal(fee or self.fee_close)
-        return float(sell_trade - fees)
+        interest_total = self.calc_total_interest(
+            rate = (interest_rate or self.interest_rate)
+            duration = (self.order_filled_date - self.order_date).total_seconds() * 360
+            interest_rate or self.interest_rate)
+        return float(sell_trade - fees - interest_total)
 
     def calc_profit(self, rate: Optional[float] = None,
-                    fee: Optional[float] = None) -> float:
+                    fee: Optional[float] = None, interest_rate: Optional[float] = None) -> float:
         """
         Calculate the absolute profit in stake currency between Close and Open trade
         :param fee: fee to use on the close rate (optional).
@@ -505,6 +509,7 @@ class Trade(_DECL_BASE):
             rate=(rate or self.close_rate),
             fee=(fee or self.fee_close)
         )
+        
         profit = close_trade_price - self.open_trade_price
         return float(f"{profit:.8f}")
 
