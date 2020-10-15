@@ -579,7 +579,7 @@ class Exchange:
             params.update({'timeInForce': time_in_force})
         
         ''' Set type to 'margin' if margin trading is enabled '''
-        if self._config['margin'].get('enabled'):
+        if self._config.get('margin', {}).get('enabled'):
             params.update({'type': 'margin'})
             if self._config['margin'].get('isolated'):
                 params.update({'isolated': True})
@@ -600,7 +600,7 @@ class Exchange:
             params.update({'timeInForce': time_in_force})
         
          ''' Set type to 'margin' if margin trading is enabled '''
-        if self._config['margin'].get('enabled'):
+        if self._config.get('margin', {}).get('enabled'):
             params.update({'type': 'margin'})
             if self._config['margin'].get('isolated'):
                 params.update({'isolated': True})
