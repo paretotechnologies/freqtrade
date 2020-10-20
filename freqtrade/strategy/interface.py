@@ -530,6 +530,65 @@ class IStrategy(ABC):
         # logger.debug(f"{trade.pair} - No sell signal. sell_flag=False")
         return SellCheckTuple(sell_flag=False, sell_type=SellType.NONE)
 
+     def should_exit(self, trade: Trade, rate: float, date: datetime, buy: bool,
+                    sell: bool, low: float = None, high: float = None,
+                    force_stoploss: float = 0) -> SellCheckTuple:
+        """
+        This function evaluates if one of the conditions required to trigger an exit
+        has been reached, which can either be a stop-loss, ROI or exit-signal.
+        :param low: Only used during backtesting to simulate stoploss
+        :param high: Only used during backtesting, to simulate ROI
+        :param force_stoploss: Externally provided stoploss
+        :return: True if trade should be sold, False otherwise
+        """
+        # Set current rate to low for backtesting sell
+        current_rate = low or rate
+        current_profit = trade.calc_profit_ratio(current_rate)
+
+        trade.adjust_min_max_rates(high or current_rate)
+
+        stoplossflag = self.stop_loss_reached(current_rate=current_rate, trade=trade,
+                                              current_time=date, current_profit=current_profit,
+                                              force_stoploss=force_stoploss, high=high)
+
+        if stoplossflag.sell_flag:
+            logger.debug(f"{trade.pair} - Stoploss hit. sell_flag=True, "
+                         f"sell_type={stoplossflag.sell_type}")
+            return stoplossflag
+
+        # Set current rate to high for backtesting sell
+        current_rate = high or rate
+        current_profit = trade.calc_profit_ratio(current_rate)
+        config_ask_strategy = self.config.get('ask_strategy', {})
+
+        if buy and config_ask_strategy.get('ignore_roi_if_buy_signal', False):
+            # This one is noisy, commented out
+            # logger.debug(f"{trade.pair} - Buy signal still active. sell_flag=False")
+            return SellCheckTuple(sell_flag=False, sell_type=SellType.NONE)
+
+        # Check if minimal roi has been reached and no longer in buy conditions (avoiding a fee)
+        if self.min_roi_reached(trade=trade, current_profit=current_profit, current_time=date):
+            logger.debug(f"{trade.pair} - Required profit reached. sell_flag=True, "
+                         f"sell_type=SellType.ROI")
+            return SellCheckTuple(sell_flag=True, sell_type=SellType.ROI)
+
+        if config_ask_strategy.get('sell_profit_only', False):
+            # This one is noisy, commented out
+            # logger.debug(f"{trade.pair} - Checking if trade is profitable...")
+            if trade.calc_profit(rate=rate) <= 0:
+                # This one is noisy, commented out
+                # logger.debug(f"{trade.pair} - Trade is not profitable. sell_flag=False")
+                return SellCheckTuple(sell_flag=False, sell_type=SellType.NONE)
+
+        if sell and not buy and config_ask_strategy.get('use_sell_signal', True):
+            logger.debug(f"{trade.pair} - Sell signal received. sell_flag=True, "
+                         f"sell_type=SellType.SELL_SIGNAL")
+            return SellCheckTuple(sell_flag=True, sell_type=SellType.SELL_SIGNAL)
+
+        # This one is noisy, commented out...
+        # logger.debug(f"{trade.pair} - No sell signal. sell_flag=False")
+        return SellCheckTuple(sell_flag=False, sell_type=SellType.NONE)
+
     def stop_loss_reached(self, current_rate: float, trade: Trade,
                           current_time: datetime, current_profit: float,
                           force_stoploss: float, high: float = None) -> SellCheckTuple:
