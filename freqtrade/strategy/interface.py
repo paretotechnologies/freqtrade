@@ -27,10 +27,14 @@ logger = logging.getLogger(__name__)
 
 class SignalType(Enum):
     """
-    Enum to distinguish between buy and sell signals
+    Enum to distinguish between long entry, long exit, short entry, and short exit signals
     """
-    BUY = "buy"
-    SELL = "sell"
+    LONG_ENTRY = "long_entry"
+    LONG_EXIT = "long_exit"
+    SHORT_ENTRY = "short_entry"
+    SHORT_EXIT = "short_exit"
+    # BUY = "buy"
+    # SELL = "sell"
 
 
 class SellType(Enum):
@@ -76,8 +80,12 @@ class IStrategy(ABC):
     INTERFACE_VERSION: int = 2
 
     _populate_fun_len: int = 0
-    _buy_fun_len: int = 0
-    _sell_fun_len: int = 0
+    _long_entry_fun_len: int = 0
+    _long_exit_fun_len: int = 0
+    _short_entry_fun_len: int = 0
+    _short_exit_fun_len: int = 0
+    # _buy_fun_len: int = 0
+    # _sell_fun_len: int = 0
     # associated minimal roi
     minimal_roi: Dict
 
@@ -96,8 +104,8 @@ class IStrategy(ABC):
 
     # Optional order types
     order_types: Dict = {
-        'buy': 'limit',
-        'sell': 'limit',
+        'long': 'limit',
+        'short': 'limit',
         'stoploss': 'limit',
         'stoploss_on_exchange': False,
         'stoploss_on_exchange_interval': 60,
@@ -105,8 +113,8 @@ class IStrategy(ABC):
 
     # Optional time in force
     order_time_in_force: Dict = {
-        'buy': 'gtc',
-        'sell': 'gtc',
+        'long': 'gtc',
+        'short': 'gtc',
     }
 
     # run "populate_indicators" only for new candle
@@ -331,8 +339,12 @@ class IStrategy(ABC):
         """
         logger.debug("TA Analysis Launched")
         dataframe = self.advise_indicators(dataframe, metadata)
-        dataframe = self.advise_buy(dataframe, metadata)
-        dataframe = self.advise_sell(dataframe, metadata)
+        dataframe = self.advise_long_entry(dataframe, metadata)
+        dataframe = self.advise_long_exit(dataframe, metadata)
+        dataframe = self.advise_short_entry(dataframe, metadata)
+        dataframe = self.advise_short_exit(dataframe, metadata)
+        # dataframe = self.advise_buy(dataframe, metadata)
+        # dataframe = self.advise_sell(dataframe, metadata)
         return dataframe
 
     def _analyze_ticker_internal(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
@@ -627,6 +639,7 @@ class IStrategy(ABC):
             return self.populate_indicators(dataframe)  # type: ignore
         else:
             return self.populate_indicators(dataframe, metadata)
+        
 
     def advise_buy(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         """
@@ -659,3 +672,68 @@ class IStrategy(ABC):
             return self.populate_sell_trend(dataframe)  # type: ignore
         else:
             return self.populate_sell_trend(dataframe, metadata)
+
+    def advise_long_entry(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        """
+        Based on TA indicators, populates the long entry signal for the given dataframe
+        This method should not be overridden.
+        :param dataframe: DataFrame
+        :param pair: Additional information, like the currently traded pair
+        :return: DataFrame with buy column
+        """
+        logger.debug(f"Populating long entry signals for pair {metadata.get('pair')}.")
+        if self._long_entry_fun_len == 2:
+            warnings.warn("deprecated - check out the Sample strategy to see "
+                          "the current function headers!", DeprecationWarning)
+            return self.populate_long_entry_trend(dataframe)  # type: ignore
+        else:
+            return self.populate_long_entry_trend(dataframe, metadata)
+        
+    def advise_long_exit(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        """
+        Based on TA indicators, populates the long exit signal for the given dataframe
+        This method should not be overridden.
+        :param dataframe: DataFrame
+        :param pair: Additional information, like the currently traded pair
+        :return: DataFrame with buy column
+        """
+        logger.debug(f"Populating long exit signals for pair {metadata.get('pair')}.")
+        if self._long_entry_fun_len == 2:
+            warnings.warn("deprecated - check out the Sample strategy to see "
+                          "the current function headers!", DeprecationWarning)
+            return self.populate_long_exit_trend(dataframe)  # type: ignore
+        else:
+            return self.populate_long_exit_trend(dataframe, metadata)
+
+    
+    def advise_short_entry(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        """
+        Based on TA indicators, populates the short entry signal for the given dataframe
+        This method should not be overridden.
+        :param dataframe: DataFrame
+        :param pair: Additional information, like the currently traded pair
+        :return: DataFrame with buy column
+        """
+        logger.debug(f"Populating short entry signals for pair {metadata.get('pair')}.")
+        if self._long_entry_fun_len == 2:
+            warnings.warn("deprecated - check out the Sample strategy to see "
+                          "the current function headers!", DeprecationWarning)
+            return self.populate_long_entry_trend(dataframe)  # type: ignore
+        else:
+            return self.populate_long_entry_trend(dataframe, metadata)
+        
+    def advise_short_exit(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        """
+        Based on TA indicators, populates the short exit signal for the given dataframe
+        This method should not be overridden.
+        :param dataframe: DataFrame
+        :param pair: Additional information, like the currently traded pair
+        :return: DataFrame with buy column
+        """
+        logger.debug(f"Populating short exit signals for pair {metadata.get('pair')}.")
+        if self._long_entry_fun_len == 2:
+            warnings.warn("deprecated - check out the Sample strategy to see "
+                          "the current function headers!", DeprecationWarning)
+            return self.populate_long_exit_trend(dataframe)  # type: ignore
+        else:
+            return self.populate_long_exit_trend(dataframe, metadata)
