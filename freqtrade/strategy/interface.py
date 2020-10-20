@@ -170,6 +170,42 @@ class IStrategy(ABC):
         :return: DataFrame with sell column
         """
 
+    @abstractmethod
+    def populate_long_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        """
+        Based on TA indicators, populates the long entry signal for the given dataframe
+        :param dataframe: DataFrame
+        :param metadata: Additional information, like the currently traded pair
+        :return: DataFrame with buy column
+        """
+    
+    @abstractmethod
+    def populate_long_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        """
+        Based on TA indicators, populates the long exit signal for the given dataframe
+        :param dataframe: DataFrame
+        :param metadata: Additional information, like the currently traded pair
+        :return: DataFrame with buy column
+        """
+
+    @abstractmethod
+    def populate_short_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        """
+        Based on TA indicators, populates the short entry signal for the given dataframe
+        :param dataframe: DataFrame
+        :param metadata: Additional information, like the currently traded pair
+        :return: DataFrame with buy column
+        """
+    
+    @abstractmethod
+    def populate_short_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
+        """
+        Based on TA indicators, populates the short exit signal for the given dataframe
+        :param dataframe: DataFrame
+        :param metadata: Additional information, like the currently traded pair
+        :return: DataFrame with buy column
+        """
+
     def check_buy_timeout(self, pair: str, trade: Trade, order: dict, **kwargs) -> bool:
         """
         Check buy timeout function callback.
@@ -467,6 +503,7 @@ class IStrategy(ABC):
             return False, False
 
         (buy, sell) = latest[SignalType.BUY.value] == 1, latest[SignalType.SELL.value] == 1
+        (long_entry, long_exit, short_entry, short_exit) = latest[SignalType.LONG_ENTRY.value] == 1, latest[SignalType.LONG_EXIT.value], latest[SignalType.SHORT_ENTRY.value], latest[SignalType.SHORT_EXIT.value]
         logger.debug('trigger: %s (pair=%s) buy=%s sell=%s',
                      latest['date'], pair, str(buy), str(sell))
         return buy, sell
