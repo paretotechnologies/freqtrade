@@ -318,6 +318,14 @@ CONF_SCHEMA = {
                 'remove_pumps': {'type': 'boolean'}
             },
             'required': ['process_throttle_secs', 'allowed_risk']
+        },
+        'margin': {
+            'type': 'object',
+            'properties': {
+                'enabled': {'type': 'boolean'},
+                'isolated': {'type': 'boolean'},
+                'auto_repay': {'type': 'boolean'}
+            }
         }
     },
 }
